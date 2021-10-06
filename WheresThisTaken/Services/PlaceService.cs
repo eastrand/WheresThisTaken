@@ -7,6 +7,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Runtime.Serialization.Json;
 using System.Threading.Tasks;
+using WheresThisTaken.Models;
 
 namespace WheresThisTaken.Services
 {
@@ -38,8 +39,39 @@ namespace WheresThisTaken.Services
                 }
                 else thereturn = "fail";
             }
-            catch { thereturn = "Connection-error"; }
+            catch(Exception e){
+                Console.WriteLine("{0} Exception caught.", e);
+                thereturn = e.ToString();
+            }
             return thereturn;
+        }
+        public async Task<Place> GetPlaceAsync(string cityname, string countrycode)
+        {
+            var client = new HttpClient();
+            var uri = new Uri("https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input=" + cityname + "," + countrycode + "&inputtype=textquery&key=" + apikey);
+            try
+            {
+                var response = await client.GetAsync(uri);
+                if (response.IsSuccessStatusCode)
+                {
+                    var result = await response.Content.ReadAsStringAsync();
+                    var jsonData = (Root)JsonConvert.DeserializeObject(result);
+
+                    if (jsonData.Status != "ZERO_RESULTS")
+                    {
+                        var place = jsonData.Places.FirstOrDefault();
+                        System.Diagnostics.Debug.WriteLine(place.ToString());
+                        return place;
+                    }
+                    else
+                        return null;
+                }
+            }
+            catch (Exception e)
+            {
+                System.Diagnostics.Debug.WriteLine("{0} Exception caught.", e);
+            }
+            return null;
         }
     }
 }

@@ -7,8 +7,7 @@ namespace WheresThisTaken.Model
 {
     interface IRound
     {
-        string Score { get; set; }
+        int Score { get; set; }
         int CalculateScore();
-        void MakeGuess();
     }
 }
